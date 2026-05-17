@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>StackSpy — See What Tools Your Competitors Use</title>
+  <meta name="description" content="Instantly detect which SEO, AI, and analytics tools any website uses. Free forever." />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root { --bg:#0a0a0f; --surface:#12121a; --border:#1e1e2e; --accent:#00e5a0; --accent2:#7b5ea7; --text:#e8e8f0; --muted:#6b6b85; --seo:#3b82f6; --analytics:#f59e0b; --ai:#8b5cf6; --marketing:#ec4899; --cms:#10b981; }
+    html { scroll-behavior: smooth; }
+    body { font-family:'DM Sans',sans-serif; background:var(--bg); color:var(--text); min-height:100vh; overflow-x:hidden; }
+    body::before { content:''; position:fixed; inset:0; background-image:linear-gradient(rgba(0,229,160,0.03) 1px,transparent 1px),linear-gradient(90deg,rgba(0,229,160,0.03) 1px,transparent 1px); background-size:60px 60px; pointer-events:none; z-index:0; }
+    header { position:relative; z-index:1; display:flex; align-items:center; justify-content:space-between; padding:1.25rem 2rem; border-bottom:1px solid var(--border); }
+    .logo { font-family:'Syne',sans-serif; font-weight:800; font-size:1.4rem; letter-spacing:-0.02em; display:flex; align-items:center; gap:0.5rem; }
+    .logo span { color:var(--accent); }
+    .badge { font-size:0.65rem; background:rgba(0,229,160,0.12); color:var(--accent); border:1px solid rgba(0,229,160,0.25); padding:0.2rem 0.55rem; border-radius:999px; font-family:'DM Mono',monospace; letter-spacing:0.05em; }
+    .hero { position:relative; z-index:1; text-align:center; padding:5rem 1.5rem 4rem; }
+    .hero-eyebrow { font-family:'DM Mono',monospace; font-size:0.75rem; color:var(--accent); letter-spacing:0.12em; text-transform:uppercase; margin-bottom:1.5rem; opacity:0; animation:fadeUp 0.6s ease forwards 0.1s; }
+    .hero h1 { font-family:'Syne',sans-serif; font-weight:800; font-size:clamp(2.2rem,6vw,4.5rem); line-height:1.05; letter-spacing:-0.03em; margin-bottom:1.25rem; opacity:0; animation:fadeUp 0.6s ease forwards 0.2s; }
+    .hero h1 em { font-style:normal; color:var(--accent); }
+    .hero p { font-size:1.1rem; color:var(--muted); max-width:520px; margin:0 auto 2.5rem; line-height:1.65; opacity:0; animation:fadeUp 0.6s ease forwards 0.3s; }
+    .search-wrap { max-width:620px; margin:0 auto; opacity:0; animation:fadeUp 0.6s ease forwards 0.4s; }
+    .search-box { display:flex; background:var(--surface); border:1px solid var(--border); border-radius:12px; overflow:hidden; transition:border-color 0.2s,box-shadow 0.2s; }
+    .search-box:focus-within { border-color:var(--accent); box-shadow:0 0 0 3px rgba(0,229,160,0.1); }
+    .search-box input { flex:1; background:transparent; border:none; outline:none; padding:1rem 1.25rem; font-size:1rem; color:var(--text); font-family:'DM Mono',monospace; min-width:0; }
+    .search-box input::placeholder { color:var(--muted); }
+    .search-box button { background:var(--accent); color:#0a0a0f; border:none; padding:0 1.5rem; font-family:'Syne',sans-serif; font-weight:700; font-size:0.9rem; cursor:pointer; transition:opacity 0.15s; white-space:nowrap; letter-spacing:0.02em; }
+    .search-box button:hover { opacity:0.88; }
+    .search-box button:disabled { opacity:0.5; cursor:not-allowed; }
+    .examples { display:flex; gap:0.5rem; justify-content:center; flex-wrap:wrap; margin-top:1rem; }
+    .example-btn { font-family:'DM Mono',monospace; font-size:0.72rem; padding:0.3rem 0.7rem; background:transparent; border:1px solid var(--border); color:var(--muted); border-radius:999px; cursor:pointer; transition:color 0.15s,border-color 0.15s; }
+    .example-btn:hover { color:var(--text); border-color:var(--muted); }
+    #results { position:relative; z-index:1; max-width:900px; margin:0 auto; padding:0 1.5rem 5rem; }
+    .loader { text-align:center; padding:4rem 0; display:none; }
+    .spinner { width:40px; height:40px; border:2px solid var(--border); border-top-color:var(--accent); border-radius:50%; animation:spin 0.7s linear infinite; margin:0 auto 1rem; }
+    .loader p { color:var(--muted); font-size:0.9rem; }
+    .error-box { background:rgba(239,68,68,0.08); border:1px solid rgba(239,68,68,0.25); color:#f87171; padding:1rem 1.25rem; border-radius:10px; margin-bottom:1.5rem; display:none; font-size:0.9rem; }
+    .result-header { display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:1rem; margin-bottom:2rem; padding-bottom:1.25rem; border-bottom:1px solid var(--border); display:none; }
+    .result-site { font-family:'DM Mono',monospace; font-size:1rem; color:var(--accent); }
+    .result-meta { font-size:0.8rem; color:var(--muted); }
+    .result-count { font-family:'Syne',sans-serif; font-size:1.8rem; font-weight:800; color:var(--text); }
+    .category-section { margin-bottom:2.5rem; display:none; }
+    .category-title { display:flex; align-items:center; gap:0.6rem; font-family:'Syne',sans-serif; font-weight:700; font-size:0.8rem; text-transform:uppercase; letter-spacing:0.1em; margin-bottom:0.75rem; padding:0.35rem 0.75rem; border-radius:6px; width:fit-content; }
+    .cat-SEO { color:var(--seo); background:rgba(59,130,246,0.1); }
+    .cat-Analytics { color:var(--analytics); background:rgba(245,158,11,0.1); }
+    .cat-AI { color:var(--ai); background:rgba(139,92,246,0.1); }
+    .cat-Marketing { color:var(--marketing); background:rgba(236,72,153,0.1); }
+    .cat-CMS { color:var(--cms); background:rgba(16,185,129,0.1); }
+    .tool-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(240px,1fr)); gap:0.75rem; }
+    .tool-card { background:var(--surface); border:1px solid var(--border); border-radius:10px; padding:1rem 1.1rem; display:flex; align-items:flex-start; gap:0.75rem; animation:cardIn 0.4s ease forwards; opacity:0; transition:border-color 0.2s,transform 0.2s; }
+    .tool-card:hover { border-color:var(--muted); transform:translateY(-2px); }
+    .tool-icon { font-size:1.4rem; flex-shrink:0; }
+    .tool-info h3 { font-family:'Syne',sans-serif; font-weight:700; font-size:0.9rem; margin-bottom:0.25rem; }
+    .tool-info p { font-size:0.78rem; color:var(--muted); line-height:1.4; }
+    .empty-state { text-align:center; padding:4rem 0; display:none; }
+    .empty-state h3 { font-family:'Syne',sans-serif; font-size:1.2rem; margin-bottom:0.5rem; }
+    .empty-state p { color:var(--muted); font-size:0.9rem; }
+    footer { position:relative; z-index:1; text-align:center; padding:2rem; border-top:1px solid var(--border); color:var(--muted); font-size:0.8rem; }
+    footer a { color:var(--accent); text-decoration:none; }
+    @keyframes fadeUp { from { opacity:0; transform:translateY(16px); } to { opacity:1; transform:translateY(0); } }
+    @keyframes spin { to { transform:rotate(360deg); } }
+    @keyframes cardIn { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:translateY(0); } }
+    @media (max-width:480px) { .search-box { flex-direction:column; border-radius:10px; } .search-box button { padding:0.85rem; border-top:1px solid var(--border); } }
+  </style>
+</head>
+<body>
+<header>
+  <div class="logo">Stack<span>Spy</span></div>
+  <span class="badge">FREE FOREVER</span>
+</header>
+<section class="hero">
+  <p class="hero-eyebrow">Competitive Intelligence Tool</p>
+  <h1>See what tools your<br/><em>competitors</em> use</h1>
+  <p>Enter any website URL. StackSpy scans it and shows every SEO, AI, and analytics tool running on it — instantly, for free.</p>
+  <div class="search-wrap">
+    <div class="search-box">
+      <input type="text" id="urlInput" placeholder="competitor.com" autocomplete="off" spellcheck="false" />
+      <button id="scanBtn" onclick="runScan()">Scan Site →</button>
+    </div>
+    <div class="examples">
+      <span style="font-size:0.72rem;color:var(--muted);align-self:center;">Try:</span>
+      <button class="example-btn" onclick="tryExample('ahrefs.com')">ahrefs.com</button>
+      <button class="example-btn" onclick="tryExample('semrush.com')">semrush.com</button>
+      <button class="example-btn" onclick="tryExample('moz.com')">moz.com</button>
+    </div>
+  </div>
+</section>
+<div id="results">
+  <div class="loader" id="loader"><div class="spinner"></div><p>Scanning website...</p></div>
+  <div class="error-box" id="errorBox"></div>
+  <div class="result-header" id="resultHeader">
+    <div><div class="result-site" id="resultSite"></div><div class="result-meta" id="resultMeta"></div></div>
+    <div style="text-align:right"><div class="result-count" id="resultCount"></div><div class="result-meta">tools detected</div></div>
+  </div>
+  <div class="empty-state" id="emptyState"><h3>😶 No tools detected</h3><p>This site may load tools dynamically or block automated requests.</p></div>
+  <div id="toolResults"></div>
+</div>
+<footer>
+  Built with ❤️ — Free and open source &nbsp;|&nbsp;
+  <a href="https://github.com/AbrorMalikov/stackspy" target="_blank">View on GitHub</a>
+</footer>
+<script>
+  const API_BASE = "/api/scan";
+  async function runScan() {
+    const input = document.getElementById("urlInput").value.trim();
+    if (!input) { document.getElementById("urlInput").focus(); return; }
+    hide("errorBox"); hide("resultHeader"); hide("emptyState");
+    document.getElementById("toolResults").innerHTML = "";
+    show("loader");
+    document.getElementById("scanBtn").disabled = true;
+    try {
+      const res = await fetch(API_BASE + "?url=" + encodeURIComponent(input));
+      const data = await res.json();
+      if (!res.ok) { showError(data.error || "Something went wrong."); return; }
+      displayResults(data);
+    } catch (err) {
+      showError("Network error. Make sure the API is deployed and running.");
+    } finally {
+      hide("loader");
+      document.getElementById("scanBtn").disabled = false;
+    }
+  }
+  function displayResults(data) {
+    document.getElementById("resultSite").textContent = data.hostname;
+    document.getElementById("resultMeta").textContent = "Scanned at " + new Date(data.scannedAt).toLocaleTimeString();
+    document.getElementById("resultCount").textContent = data.totalFound;
+    document.getElementById("resultHeader").style.display = "flex";
+    if (data.totalFound === 0) { show("emptyState"); return; }
+    const container = document.getElementById("toolResults");
+    for (const cat of ["SEO","Analytics","AI","Marketing","CMS"]) {
+      if (!data.tools[cat]) continue;
+      const section = document.createElement("div");
+      section.className = "category-section";
+      section.style.display = "block";
+      section.innerHTML = '<div class="category-title cat-' + cat + '">' + getCatIcon(cat) + ' ' + cat + '</div><div class="tool-grid">' +
+        data.tools[cat].map((t,i) => '<div class="tool-card" style="animation-delay:' + (i*0.06) + 's"><div class="tool-icon">' + t.icon + '</div><div class="tool-info"><h3>' + t.name + '</h3><p>' + t.description + '</p></div></div>').join("") +
+        '</div>';
+      container.appendChild(section);
+    }
+  }
+  function getCatIcon(c) { return {SEO:"🔍",Analytics:"📊",AI:"🤖",Marketing:"📧",CMS:"🌐"}[c]||"🔧"; }
+  function showError(msg) { const b=document.getElementById("errorBox"); b.textContent="⚠️ "+msg; b.style.display="block"; }
+  function show(id) { document.getElementById(id).style.display="block"; }
+  function hide(id) { document.getElementById(id).style.display="none"; }
+  function tryExample(d) { document.getElementById("urlInput").value=d; runScan(); }
+  document.getElementById("urlInput").addEventListener("keydown", e => { if(e.key==="Enter") runScan(); });
+</script>
+</body>
+</html>
