@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>StackSpy</title>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    :root { --bg:#0a0a0f; --surface:#12121a; --border:#1e1e2e; --accent:#00e5a0; --text:#e8e8f0; --muted:#6b6b85; }
+    body { width:360px; background:var(--bg); color:var(--text); font-family:'DM Sans',sans-serif; font-size:14px; }
+    .header { display:flex; align-items:center; justify-content:space-between; padding:0.85rem 1rem; border-bottom:1px solid var(--border); }
+    .logo { font-family:'Syne',sans-serif; font-weight:800; font-size:1.1rem; letter-spacing:-0.02em; }
+    .logo span { color:var(--accent); }
+    .current-site { font-family:'DM Mono',monospace; font-size:0.7rem; color:var(--accent); background:rgba(0,229,160,0.08); padding:0.2rem 0.5rem; border-radius:4px; max-width:160px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+    .scan-area { padding:0.85rem 1rem; border-bottom:1px solid var(--border); }
+    .scan-btn { width:100%; background:var(--accent); color:#0a0a0f; border:none; padding:0.65rem 1rem; border-radius:8px; font-family:'Syne',sans-serif; font-weight:700; font-size:0.85rem; cursor:pointer; letter-spacing:0.02em; transition:opacity 0.15s; }
+    .scan-btn:hover { opacity:0.88; }
+    .scan-btn:disabled { opacity:0.4; cursor:not-allowed; }
+    .loader { display:none; text-align:center; padding:2rem 1rem; color:var(--muted); font-size:0.8rem; }
+    .spinner { width:28px; height:28px; border:2px solid var(--border); border-top-color:var(--accent); border-radius:50%; animation:spin 0.7s linear infinite; margin:0 auto 0.6rem; }
+    .error { display:none; margin:0.75rem 1rem; padding:0.65rem 0.85rem; background:rgba(239,68,68,0.08); border:1px solid rgba(239,68,68,0.2); color:#f87171; border-radius:7px; font-size:0.78rem; line-height:1.5; }
+    .summary { display:none; align-items:center; justify-content:space-between; padding:0.6rem 1rem; border-bottom:1px solid var(--border); background:var(--surface); }
+    .summary-count { font-family:'Syne',sans-serif; font-weight:800; font-size:1.4rem; color:var(--accent); }
+    .summary-label { font-size:0.75rem; color:var(--muted); }
+    #toolList { max-height:340px; overflow-y:auto; }
+    .cat-header { display:flex; align-items:center; gap:0.4rem; padding:0.5rem 1rem 0.3rem; font-family:'Syne',sans-serif; font-weight:700; font-size:0.7rem; text-transform:uppercase; letter-spacing:0.1em; background:var(--bg); position:sticky; top:0; }
+    .cat-SEO { color:#3b82f6; } .cat-Analytics { color:#f59e0b; } .cat-AI { color:#8b5cf6; } .cat-Marketing { color:#ec4899; } .cat-CMS { color:#10b981; }
+    .tool-row { display:flex; align-items:center; gap:0.6rem; padding:0.5rem 1rem; border-bottom:1px solid var(--border); transition:background 0.15s; }
+    .tool-row:hover { background:var(--surface); }
+    .tool-emoji { font-size:1rem; flex-shrink:0; }
+    .tool-name { font-family:'DM Sans',sans-serif; font-weight:500; font-size:0.85rem; }
+    .tool-desc { font-size:0.72rem; color:var(--muted); line-height:1.3; }
+    .empty { display:none; text-align:center; padding:2rem 1rem; color:var(--muted); font-size:0.82rem; line-height:1.6; }
+    .footer-link { display:block; text-align:center; padding:0.6rem; font-size:0.72rem; color:var(--muted); border-top:1px solid var(--border); text-decoration:none; }
+    .footer-link:hover { color:var(--accent); }
+    @keyframes spin { to { transform:rotate(360deg); } }
+    #toolList::-webkit-scrollbar { width:4px; }
+    #toolList::-webkit-scrollbar-track { background:var(--bg); }
+    #toolList::-webkit-scrollbar-thumb { background:var(--border); border-radius:2px; }
+  </style>
+</head>
+<body>
+<div class="header">
+  <div class="logo">Stack<span>Spy</span></div>
+  <div class="current-site" id="currentSite">loading...</div>
+</div>
+<div class="scan-area">
+  <button class="scan-btn" id="scanBtn" onclick="startScan()">🔍 Scan This Page</button>
+</div>
+<div class="loader" id="loader">
+  <div class="spinner"></div>
+  Scanning page for tools...
+</div>
+<div class="error" id="errorBox"></div>
+<div class="summary" id="summary">
+  <div>
+    <div class="summary-count" id="countNum">0</div>
+    <div class="summary-label">tools detected</div>
+  </div>
+  <div class="summary-label" id="scanTime"></div>
+</div>
+<div id="toolList"></div>
+<div class="empty" id="emptyState">
+  😶 No tools detected on this page.<br/>
+  The site may load tools dynamically<br/>after JavaScript runs.
+</div>
+<a class="footer-link" href="https://stackspy.vercel.app" target="_blank">
+  Open full web app →
+</a>
+<script src="fingerprints.js"></script>
+<script src="popup.js"></script>
+</body>
+</html>
