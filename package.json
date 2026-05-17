@@ -1,0 +1,13 @@
+{
+  "name": "stackspy",
+  "version": "1.0.0",
+  "description": "Free tech stack detector — see which SEO, AI and analytics tools any website uses",
+  "private": true,
+  "scripts": {
+    "dev": "vercel dev",
+    "deploy": "vercel --prod"
+  },
+  "engines": {
+    "node": "18.x"
+  }
+}
